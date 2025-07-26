@@ -138,46 +138,8 @@
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
 
-        // --- Mock da API (Simulação) ---
-        // Em um ambiente real, você removeria esta parte e faria chamadas fetch reais.
-        const mockApi = {
-            verifyLogin: (email, password) => {
-                return new Promise((resolve, reject) => {
-                    loginButton.textContent = 'Verificando...';
-                    loginButton.disabled = true;
-                    
-                    setTimeout(() => {
-                        // Simula um login de sucesso para um email específico
-                        if (email === 'usuario@email.com' && password === 'senha123') {
-                            resolve({ success: true, message: 'Login bem-sucedido!' });
-                        } else {
-                            reject({ success: false, message: 'Email ou senha inválidos.' });
-                        }
-                    }, 1500); // Simula a latência da rede
-                });
-            },
-            sendLaw: (formData) => {
-                return new Promise((resolve, reject) => {
-                    uploadButton.textContent = 'Enviando...';
-                    uploadButton.disabled = true;
-                    
-                    // Apenas para demonstração, logamos os dados que seriam enviados
-                    console.log('Dados que seriam enviados via multipart/form-data:');
-                    for (let [key, value] of formData.entries()) {
-                        console.log(`${key}:`, value);
-                    }
-                    
-                    setTimeout(() => {
-                        // Simula uma falha aleatória para demonstração
-                        if (Math.random() > 0.2) { // 80% de chance de sucesso
-                             resolve({ success: true, message: 'Lei enviada com sucesso!' });
-                        } else {
-                             reject({ success: false, message: 'Falha no servidor. Tente novamente.' });
-                        }
-                    }, 2000);
-                });
-            }
-        };
+        // !!! IMPORTANTE: Cole a URL de PRODUÇÃO do seu Webhook do n8n aqui !!!
+        const N8N_WEBHOOK_URL = 'https://n8n.lucasmanoel.cloud/webhook/861a9747-ea67-4d42-b1d8-b898304c31a0';
 
         // --- Lógica de Eventos ---
 
@@ -187,24 +149,26 @@
 
         // 1. Evento de submissão do formulário de LOGIN
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Impede o recarregamento da página
-            loginError.textContent = ''; // Limpa erros antigos
+            e.preventDefault();
+            loginError.textContent = '';
+            loginButton.textContent = 'Verificando...';
+            loginButton.disabled = true;
 
             const email = e.target.email.value;
             const password = e.target.password.value;
 
             try {
-                // Em um projeto real, a chamada seria:
-                // const response = await fetch('/verificar-login', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify({ email, password })
-                // });
-                // const data = await response.json();
-                // if (!response.ok || !data.success) throw new Error(data.message || 'Erro de autenticação');
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
                 
-                // Usando o MOCK para demonstração
-                const data = await mockApi.verifyLogin(email, password);
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Erro de autenticação');
+                }
                 
                 // Sucesso no login
                 loginSection.classList.add('hidden');
@@ -212,10 +176,8 @@
                 uploadSection.classList.add('fade-in');
 
             } catch (error) {
-                // Falha no login
-                loginError.textContent = error.message || 'Ocorreu um erro. Tente novamente.';
+                loginError.textContent = error.message;
             } finally {
-                // Restaura o botão de login
                 loginButton.textContent = 'Entrar';
                 loginButton.disabled = false;
             }
@@ -224,33 +186,33 @@
         // 2. Evento de submissão do formulário de UPLOAD
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            uploadStatus.textContent = ''; // Limpa status antigo
+            uploadStatus.textContent = '';
+            uploadButton.textContent = 'Enviando...';
+            uploadButton.disabled = true;
             
-            const formData = new FormData(uploadForm); // Coleta todos os dados do formulário
+            const formData = new FormData(uploadForm);
 
             try {
-                // Em um projeto real, a chamada seria:
-                // const response = await fetch('/enviar-lei', {
-                //     method: 'POST',
-                //     body: formData // O browser define o Content-Type automaticamente
-                // });
-                // const data = await response.json();
-                // if (!response.ok || !data.success) throw new Error(data.message || 'Erro no upload');
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData // O browser define o Content-Type como multipart/form-data
+                });
 
-                // Usando o MOCK para demonstração
-                const data = await mockApi.sendLaw(formData);
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Erro no upload do arquivo.');
+                }
 
                 // Sucesso no upload
                 uploadStatus.textContent = data.message;
-                uploadStatus.className = 'text-emerald-600 text-sm text-center h-4'; // Cor verde para sucesso
-                uploadForm.reset(); // Limpa o formulário
+                uploadStatus.className = 'text-emerald-600 text-sm text-center h-4';
+                uploadForm.reset();
 
             } catch (error) {
-                // Falha no upload
-                uploadStatus.textContent = error.message || 'Ocorreu um erro. Tente novamente.';
-                uploadStatus.className = 'text-red-600 text-sm text-center h-4'; // Cor vermelha para erro
+                uploadStatus.textContent = error.message;
+                uploadStatus.className = 'text-red-600 text-sm text-center h-4';
             } finally {
-                // Restaura o botão de upload
                 uploadButton.textContent = 'Enviar Documento';
                 uploadButton.disabled = false;
             }
