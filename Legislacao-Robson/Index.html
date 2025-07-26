@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de Leis - Acesso ao Sistema</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Define a fonte Inter como padrão e adiciona um fallback */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Estilo para animação de surgimento */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Esconde a barra de rolagem padrão do input de arquivo */
+        input[type="file"]::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+        input[type="file"]::before {
+            content: 'Escolher arquivo';
+            display: inline-block;
+            background: #f3f4f6; /* gray-100 */
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.5rem 1rem;
+            outline: none;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem; /* text-sm */
+            color: #374151; /* gray-700 */
+        }
+        input[type="file"]:hover::before {
+            border-color: #9ca3af; /* gray-400 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Card Principal -->
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
+        
+        <!-- Seção de Login (visível inicialmente) -->
+        <div id="login-section">
+            <h1 class="text-2xl font-bold text-center text-gray-800">Acesso ao Sistema</h1>
+            <p class="text-center text-gray-500 text-sm mb-6">Entre com suas credenciais para continuar.</p>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="email" class="text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="password" name="password" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                </div>
+                <button type="submit" id="login-button"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                    Entrar
+                </button>
+                <p id="login-error" class="text-red-600 text-sm text-center h-4"></p>
+            </form>
+        </div>
+
+        <!-- Seção de Upload (escondida inicialmente) -->
+        <div id="upload-section" class="hidden">
+             <h2 class="text-2xl font-bold text-center text-gray-800">Enviar Nova Lei</h2>
+             <p class="text-center text-gray-500 text-sm mb-6">Preencha os dados e anexe o documento.</p>
+            
+            <form id="upload-form" class="space-y-4">
+                <div>
+                    <label for="municipio" class="text-sm font-medium text-gray-700">Município</label>
+                    <input type="text" id="municipio" name="municipio" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                <div>
+                    <label for="titulo" class="text-sm font-medium text-gray-700">Título da Lei</label>
+                    <input type="text" id="titulo" name="titulo" required
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                 <div>
+                    <label for="artigo" class="text-sm font-medium text-gray-700">Artigo <span class="text-gray-400">(Opcional)</span></label>
+                    <input type="text" id="artigo" name="artigo"
+                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+                <div>
+                    <label for="arquivo" class="text-sm font-medium text-gray-700">Arquivo (.pdf ou .txt)</label>
+                    <input type="file" id="arquivo" name="arquivo" required accept=".pdf,.txt"
+                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
+                </div>
+                <button type="submit" id="upload-button"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300 transform hover:scale-105">
+                    Enviar Documento
+                </button>
+                <p id="upload-status" class="text-sm text-center h-4"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- Seleção de Elementos do DOM ---
+        const loginSection = document.getElementById('login-section');
+        const uploadSection = document.getElementById('upload-section');
+        const loginForm = document.getElementById('login-form');
+        const uploadForm = document.getElementById('upload-form');
+        const loginButton = document.getElementById('login-button');
+        const uploadButton = document.getElementById('upload-button');
+        const loginError = document.getElementById('login-error');
+        const uploadStatus = document.getElementById('upload-status');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        // --- Mock da API (Simulação) ---
+        // Em um ambiente real, você removeria esta parte e faria chamadas fetch reais.
+        const mockApi = {
+            verifyLogin: (email, password) => {
+                return new Promise((resolve, reject) => {
+                    loginButton.textContent = 'Verificando...';
+                    loginButton.disabled = true;
+                    
+                    setTimeout(() => {
+                        // Simula um login de sucesso para um email específico
+                        if (email === 'usuario@email.com' && password === 'senha123') {
+                            resolve({ success: true, message: 'Login bem-sucedido!' });
+                        } else {
+                            reject({ success: false, message: 'Email ou senha inválidos.' });
+                        }
+                    }, 1500); // Simula a latência da rede
+                });
+            },
+            sendLaw: (formData) => {
+                return new Promise((resolve, reject) => {
+                    uploadButton.textContent = 'Enviando...';
+                    uploadButton.disabled = true;
+                    
+                    // Apenas para demonstração, logamos os dados que seriam enviados
+                    console.log('Dados que seriam enviados via multipart/form-data:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}:`, value);
+                    }
+                    
+                    setTimeout(() => {
+                        // Simula uma falha aleatória para demonstração
+                        if (Math.random() > 0.2) { // 80% de chance de sucesso
+                             resolve({ success: true, message: 'Lei enviada com sucesso!' });
+                        } else {
+                             reject({ success: false, message: 'Falha no servidor. Tente novamente.' });
+                        }
+                    }, 2000);
+                });
+            }
+        };
+
+        // --- Lógica de Eventos ---
+
+        // Limpa o erro de login ao digitar novamente
+        emailInput.addEventListener('input', () => loginError.textContent = '');
+        passwordInput.addEventListener('input', () => loginError.textContent = '');
+
+        // 1. Evento de submissão do formulário de LOGIN
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Impede o recarregamento da página
+            loginError.textContent = ''; // Limpa erros antigos
+
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+
+            try {
+                // Em um projeto real, a chamada seria:
+                // const response = await fetch('/verificar-login', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ email, password })
+                // });
+                // const data = await response.json();
+                // if (!response.ok || !data.success) throw new Error(data.message || 'Erro de autenticação');
+                
+                // Usando o MOCK para demonstração
+                const data = await mockApi.verifyLogin(email, password);
+                
+                // Sucesso no login
+                loginSection.classList.add('hidden');
+                uploadSection.classList.remove('hidden');
+                uploadSection.classList.add('fade-in');
+
+            } catch (error) {
+                // Falha no login
+                loginError.textContent = error.message || 'Ocorreu um erro. Tente novamente.';
+            } finally {
+                // Restaura o botão de login
+                loginButton.textContent = 'Entrar';
+                loginButton.disabled = false;
+            }
+        });
+
+        // 2. Evento de submissão do formulário de UPLOAD
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            uploadStatus.textContent = ''; // Limpa status antigo
+            
+            const formData = new FormData(uploadForm); // Coleta todos os dados do formulário
+
+            try {
+                // Em um projeto real, a chamada seria:
+                // const response = await fetch('/enviar-lei', {
+                //     method: 'POST',
+                //     body: formData // O browser define o Content-Type automaticamente
+                // });
+                // const data = await response.json();
+                // if (!response.ok || !data.success) throw new Error(data.message || 'Erro no upload');
+
+                // Usando o MOCK para demonstração
+                const data = await mockApi.sendLaw(formData);
+
+                // Sucesso no upload
+                uploadStatus.textContent = data.message;
+                uploadStatus.className = 'text-emerald-600 text-sm text-center h-4'; // Cor verde para sucesso
+                uploadForm.reset(); // Limpa o formulário
+
+            } catch (error) {
+                // Falha no upload
+                uploadStatus.textContent = error.message || 'Ocorreu um erro. Tente novamente.';
+                uploadStatus.className = 'text-red-600 text-sm text-center h-4'; // Cor vermelha para erro
+            } finally {
+                // Restaura o botão de upload
+                uploadButton.textContent = 'Enviar Documento';
+                uploadButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
