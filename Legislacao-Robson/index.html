@@ -3,74 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload de Leis - Acesso ao Sistema.</title>
-    
+    <title>Painel de Controle - Gerenciador de Legislação</title>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Ícones (Lucide Icons) -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.js"></script>
+    <script src="https://unpkg.com/lucide-icons@latest/dist/lucide.min.js"></script>
+
+
     <style>
-        /* Define a fonte Inter como padrão e adiciona um fallback */
+        /* Define a fonte Inter como padrão e melhora a renderização */
         body {
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Estilo para animação de surgimento */
+        /* Animações suaves */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .fade-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
-
-        /* Esconde a barra de rolagem padrão do input de arquivo */
-        input[type="file"]::-webkit-file-upload-button {
-            visibility: hidden;
-        }
-        input[type="file"]::before {
-            content: 'Escolher arquivo';
-            display: inline-block;
-            background: #f3f4f6; /* gray-100 */
-            border: 1px solid #d1d5db; /* gray-300 */
-            border-radius: 0.375rem; /* rounded-md */
-            padding: 0.5rem 1rem;
-            outline: none;
-            white-space: nowrap;
-            -webkit-user-select: none;
-            user-select: none;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.875rem; /* text-sm */
-            color: #374151; /* gray-700 */
-        }
-        input[type="file"]:hover::before {
-            border-color: #9ca3af; /* gray-400 */
+        
+        /* Esconde a seção por padrão */
+        .hidden {
+            display: none;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100 text-gray-800">
 
-    <!-- Card Principal -->
-    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
-        
-        <!-- Seção de Login (visível inicialmente) -->
-        <div id="login-section">
-            <h1 class="text-2xl font-bold text-center text-gray-800">Acesso ao Sistema</h1>
-            <p class="text-center text-gray-500 text-sm mb-6">Entre com suas credenciais para continuar.</p>
-            
+    <!-- Seção de Login (visível inicialmente) -->
+    <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6 fade-in">
+            <div class="text-center">
+                <h1 class="text-2xl font-bold text-gray-800">Acesso ao Painel de Controle</h1>
+                <p class="text-gray-500 text-sm mt-2">Utilize suas credenciais para gerenciar a base de conhecimento.</p>
+            </div>
             <form id="login-form" class="space-y-4">
                 <div>
                     <label for="email" class="text-sm font-medium text-gray-700">Email</label>
@@ -83,139 +62,273 @@
                            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                 </div>
                 <button type="submit" id="login-button"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300">
                     Entrar
                 </button>
                 <p id="login-error" class="text-red-600 text-sm text-center h-4"></p>
             </form>
         </div>
+    </div>
 
-        <!-- Seção de Upload (escondida inicialmente) -->
-        <div id="upload-section" class="hidden">
-             <h2 class="text-2xl font-bold text-center text-gray-800">Enviar Nova Lei</h2>
-             <p class="text-center text-gray-500 text-sm mb-6">Preencha os dados e anexe o documento.</p>
-            
-            <form id="upload-form" class="space-y-4">
-                <div>
-                    <label for="municipio" class="text-sm font-medium text-gray-700">Município</label>
-                    <input type="text" id="municipio" name="municipio" required
-                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+    <!-- Seção do Painel Principal (escondida inicialmente) -->
+    <div id="panel-section" class="hidden">
+        <!-- Cabeçalho -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-900">Gerenciador de Legislação</h1>
+                <div class="flex items-center space-x-2">
+                     <span id="user-email-display" class="text-sm text-gray-600"></span>
+                     <button id="logout-button" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" title="Sair">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
                 </div>
-                <div>
-                    <label for="titulo" class="text-sm font-medium text-gray-700">Título da Lei</label>
-                    <input type="text" id="titulo" name="titulo" required
-                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Coluna da Esquerda: Adicionar Documento -->
+                <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 h-fit">
+                    <h2 class="text-lg font-bold flex items-center">
+                        <i data-lucide="file-plus-2" class="w-5 h-5 mr-2"></i>
+                        Adicionar Novo Documento
+                    </h2>
+                    <form id="upload-form" class="space-y-4 mt-4">
+                        <div>
+                            <label for="municipio" class="text-sm font-medium text-gray-700">Município</label>
+                            <input type="text" id="municipio" name="municipio" required
+                                   class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label for="titulo" class="text-sm font-medium text-gray-700">Título do Documento</label>
+                            <input type="text" id="titulo" name="titulo" required
+                                   class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label for="artigo" class="text-sm font-medium text-gray-700">Artigo/Seção <span class="text-gray-400">(Opcional)</span></label>
+                            <input type="text" id="artigo" name="artigo"
+                                   class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label for="arquivo" class="text-sm font-medium text-gray-700">Arquivo (.pdf ou .txt)</label>
+                            <input type="file" id="arquivo" name="arquivo" required accept=".pdf,.txt"
+                                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
+                        </div>
+                        <button type="submit" id="upload-button"
+                                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300">
+                            <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i>
+                            Enviar Documento
+                        </button>
+                        <p id="upload-status" class="text-sm text-center h-4"></p>
+                    </form>
                 </div>
-                 <div>
-                    <label for="artigo" class="text-sm font-medium text-gray-700">Artigo <span class="text-gray-400">(Opcional)</span></label>
-                    <input type="text" id="artigo" name="artigo"
-                           class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+
+                <!-- Coluna da Direita: Lista de Documentos -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                     <h2 class="text-lg font-bold flex items-center">
+                        <i data-lucide="library" class="w-5 h-5 mr-2"></i>
+                        Documentos na Base de Conhecimento
+                    </h2>
+                    <div id="document-list" class="mt-4 space-y-3">
+                        <!-- Os documentos serão inseridos aqui pelo JavaScript -->
+                        <p class="text-gray-500 text-sm">Nenhum documento encontrado. Adicione um novo documento para começar.</p>
+                    </div>
                 </div>
-                <div>
-                    <label for="arquivo" class="text-sm font-medium text-gray-700">Arquivo (.pdf ou .txt)</label>
-                    <input type="file" id="arquivo" name="arquivo" required accept=".pdf,.txt"
-                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <i data-lucide="trash-2" class="w-6 h-6 text-red-600"></i>
                 </div>
-                <button type="submit" id="upload-button"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300 transform hover:scale-105">
-                    Enviar Documento
-                </button>
-                <p id="upload-status" class="text-sm text-center h-4"></p>
-            </form>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Excluir Documento</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Você tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 space-x-2">
+                    <button id="cancel-delete-button"
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none">
+                        Cancelar
+                    </button>
+                    <button id="confirm-delete-button"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none">
+                        Confirmar Exclusão
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- Seleção de Elementos do DOM ---
-        const loginSection = document.getElementById('login-section');
-        const uploadSection = document.getElementById('upload-section');
-        const loginForm = document.getElementById('login-form');
-        const uploadForm = document.getElementById('upload-form');
-        const loginButton = document.getElementById('login-button');
-        const uploadButton = document.getElementById('upload-button');
-        const loginError = document.getElementById('login-error');
-        const uploadStatus = document.getElementById('upload-status');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Ícones ---
+            lucide.createIcons();
 
-        // !!! IMPORTANTE: Cole a URL de PRODUÇÃO do seu Webhook do n8n aqui !!!
-        const N8N_WEBHOOK_URL = 'https://n8n.lucasmanoel.cloud/webhook/861a9747-ea67-4d42-b1d8-b898304c31a0';
-
-        // --- Lógica de Eventos ---
-
-        // Limpa o erro de login ao digitar novamente
-        emailInput.addEventListener('input', () => loginError.textContent = '');
-        passwordInput.addEventListener('input', () => loginError.textContent = '');
-
-        // 1. Evento de submissão do formulário de LOGIN
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            loginError.textContent = '';
-            loginButton.textContent = 'Verificando...';
-            loginButton.disabled = true;
-
-            const email = e.target.email.value;
-            const password = e.target.password.value;
-
-            try {
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-                
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Erro de autenticação');
-                }
-                
-                // Sucesso no login
-                loginSection.classList.add('hidden');
-                uploadSection.classList.remove('hidden');
-                uploadSection.classList.add('fade-in');
-
-            } catch (error) {
-                loginError.textContent = error.message;
-            } finally {
-                loginButton.textContent = 'Entrar';
-                loginButton.disabled = false;
-            }
-        });
-
-        // 2. Evento de submissão do formulário de UPLOAD
-        uploadForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            uploadStatus.textContent = '';
-            uploadButton.textContent = 'Enviando...';
-            uploadButton.disabled = true;
+            // --- Seleção de Elementos do DOM ---
+            const loginSection = document.getElementById('login-section');
+            const panelSection = document.getElementById('panel-section');
+            const loginForm = document.getElementById('login-form');
+            const uploadForm = document.getElementById('upload-form');
+            const loginButton = document.getElementById('login-button');
+            const uploadButton = document.getElementById('upload-button');
+            const logoutButton = document.getElementById('logout-button');
+            const loginError = document.getElementById('login-error');
+            const uploadStatus = document.getElementById('upload-status');
+            const userEmailDisplay = document.getElementById('user-email-display');
+            const documentListContainer = document.getElementById('document-list');
             
-            const formData = new FormData(uploadForm);
+            // Modal
+            const deleteModal = document.getElementById('delete-modal');
+            const cancelDeleteButton = document.getElementById('cancel-delete-button');
+            const confirmDeleteButton = document.getElementById('confirm-delete-button');
 
-            try {
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    body: formData // O browser define o Content-Type como multipart/form-data
-                });
+            // !!! IMPORTANTE: Cole a URL de PRODUÇÃO do seu Webhook do n8n aqui !!!
+            const N8N_WEBHOOK_URL = 'COLE_SUA_URL_DO_WEBHOOK_AQUI';
+            
+            // --- Estado da Aplicação (Simulação) ---
+            let documents = [
+                { id: 1, titulo: 'Lei Orgânica do Município', municipio: 'São Paulo', data_upload: '2024-07-30' },
+                { id: 2, titulo: 'Código de Posturas', municipio: 'Rio de Janeiro', data_upload: '2024-07-29' },
+                { id: 3, titulo: 'Plano Diretor Estratégico', municipio: 'São Paulo', data_upload: '2024-07-28' },
+            ];
+            let documentIdToDelete = null;
 
-                const data = await response.json();
+            // --- Funções ---
 
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Erro no upload do arquivo.');
+            /**
+             * Renderiza a lista de documentos na tela.
+             */
+            function renderDocumentList() {
+                documentListContainer.innerHTML = ''; // Limpa a lista
+                if (documents.length === 0) {
+                    documentListContainer.innerHTML = '<p class="text-gray-500 text-sm">Nenhum documento encontrado. Adicione um novo documento para começar.</p>';
+                    return;
                 }
 
-                // Sucesso no upload
-                uploadStatus.textContent = data.message;
-                uploadStatus.className = 'text-emerald-600 text-sm text-center h-4';
-                uploadForm.reset();
-
-            } catch (error) {
-                uploadStatus.textContent = error.message;
-                uploadStatus.className = 'text-red-600 text-sm text-center h-4';
-            } finally {
-                uploadButton.textContent = 'Enviar Documento';
-                uploadButton.disabled = false;
+                documents.forEach(doc => {
+                    const docElement = document.createElement('div');
+                    docElement.className = 'p-4 border rounded-lg flex justify-between items-center bg-gray-50';
+                    docElement.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-gray-800">${doc.titulo}</p>
+                            <p class="text-sm text-gray-500">${doc.municipio} - <span class="text-xs italic">Adicionado em: ${new Date(doc.data_upload).toLocaleDateString()}</span></p>
+                        </div>
+                        <button class="delete-button p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full transition" data-id="${doc.id}" title="Excluir">
+                            <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                        </button>
+                    `;
+                    documentListContainer.appendChild(docElement);
+                });
+                lucide.createIcons(); // Recria os ícones para os novos elementos
             }
+
+            /**
+             * Mostra o painel principal e esconde o login.
+             */
+            function showPanel(email) {
+                userEmailDisplay.textContent = email;
+                loginSection.classList.add('hidden');
+                panelSection.classList.remove('hidden');
+                panelSection.classList.add('fade-in');
+                renderDocumentList();
+            }
+
+            /**
+             * Mostra a tela de login e esconde o painel.
+             */
+            function showLogin() {
+                panelSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+                loginSection.classList.add('fade-in');
+                loginForm.reset();
+            }
+            
+            // --- Lógica de Eventos ---
+
+            // 1. Evento de submissão do formulário de LOGIN
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loginError.textContent = '';
+                loginButton.textContent = 'Verificando...';
+                loginButton.disabled = true;
+
+                const email = e.target.email.value;
+                const password = e.target.password.value;
+                
+                // --- SIMULAÇÃO DE API ---
+                // Substitua esta parte pela sua chamada `fetch` real
+                setTimeout(() => {
+                    if (email === 'admin@email.com' && password === 'senha123') {
+                        showPanel(email);
+                    } else {
+                        loginError.textContent = 'Email ou senha inválidos.';
+                    }
+                    loginButton.textContent = 'Entrar';
+                    loginButton.disabled = false;
+                }, 1000);
+            });
+            
+            // 2. Evento de submissão do formulário de UPLOAD
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                uploadStatus.textContent = 'Enviando...';
+                uploadStatus.className = 'text-blue-600 text-sm text-center h-4';
+                uploadButton.disabled = true;
+
+                // --- SIMULAÇÃO DE UPLOAD ---
+                setTimeout(() => {
+                    const newDoc = {
+                        id: Date.now(), // ID único
+                        titulo: e.target.titulo.value,
+                        municipio: e.target.municipio.value,
+                        data_upload: new Date().toISOString().split('T')[0]
+                    };
+                    documents.unshift(newDoc); // Adiciona no início da lista
+                    renderDocumentList();
+
+                    uploadStatus.textContent = 'Documento enviado com sucesso!';
+                    uploadStatus.className = 'text-emerald-600 text-sm text-center h-4';
+                    uploadForm.reset();
+                    
+                    setTimeout(() => uploadStatus.textContent = '', 3000); // Limpa a mensagem
+                    uploadButton.disabled = false;
+                }, 1500);
+            });
+
+            // 3. Evento de clique para DELETAR (usando delegação de evento)
+            documentListContainer.addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.delete-button');
+                if (deleteButton) {
+                    documentIdToDelete = parseInt(deleteButton.dataset.id);
+                    deleteModal.classList.remove('hidden');
+                }
+            });
+
+            // 4. Eventos do MODAL de exclusão
+            cancelDeleteButton.addEventListener('click', () => {
+                deleteModal.classList.add('hidden');
+                documentIdToDelete = null;
+            });
+
+            confirmDeleteButton.addEventListener('click', () => {
+                if (documentIdToDelete !== null) {
+                    documents = documents.filter(doc => doc.id !== documentIdToDelete);
+                    renderDocumentList();
+                }
+                deleteModal.classList.add('hidden');
+                documentIdToDelete = null;
+            });
+            
+            // 5. Evento de LOGOUT
+            logoutButton.addEventListener('click', showLogin);
         });
     </script>
 </body>
