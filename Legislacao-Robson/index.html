@@ -28,7 +28,6 @@
         }
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         .hidden { display: none; }
-        /* Adiciona um spinner para botões */
         .spinner {
             border: 2px solid #f3f3f3;
             border-top: 2px solid #3498db;
@@ -52,7 +51,8 @@
                 <h1 class="text-2xl font-bold text-gray-800">Acesso ao Painel de Controle</h1>
                 <p class="text-gray-500 text-sm mt-2">Utilize suas credenciais para gerenciar a base de conhecimento.</p>
             </div>
-            <form id="login-form" class="space-y-4">
+            <!-- CORREÇÃO: Adicionado onsubmit="return false;" para uma camada extra de prevenção -->
+            <form id="login-form" class="space-y-4" onsubmit="return false;">
                 <div>
                     <label for="email" class="text-sm font-medium text-gray-700">Email</label>
                     <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
@@ -61,7 +61,8 @@
                     <label for="password" class="text-sm font-medium text-gray-700">Senha</label>
                     <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                 </div>
-                <button type="submit" id="login-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300">
+                <!-- CORREÇÃO: Alterado o type do botão para "button" para não submeter o formulário por padrão -->
+                <button type="button" id="login-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300">
                     <span class="button-text">Entrar</span>
                     <div class="spinner hidden"></div>
                 </button>
@@ -70,7 +71,7 @@
         </div>
     </div>
 
-    <!-- Seção do Painel Principal -->
+    <!-- Seção do Painel Principal (O restante do código permanece o mesmo) -->
     <div id="panel-section" class="hidden">
         <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -142,7 +143,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
-            // --- Seletores do DOM ---
             const loginSection = document.getElementById('login-section');
             const panelSection = document.getElementById('panel-section');
             const loginForm = document.getElementById('login-form');
@@ -157,22 +157,22 @@
             const deleteModal = document.getElementById('delete-modal');
             const cancelDeleteButton = document.getElementById('cancel-delete-button');
             const confirmDeleteButton = document.getElementById('confirm-delete-button');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
 
-            // !!! IMPORTANTE: Cole a URL de PRODUÇÃO do seu Webhook do n8n aqui !!!
             const N8N_WEBHOOK_URL = 'https://n8n.lucasmanoel.cloud/webhook/861a9747-ea67-4d42-b1d8-b898304c31a0';
             
-            // --- Estado da Aplicação ---
             let documents = [];
             let documentIdToDelete = null;
 
-            // --- Funções Auxiliares ---
             const toggleButtonSpinner = (button, show) => {
-                button.querySelector('.button-text').classList.toggle('hidden', show);
-                button.querySelector('.spinner').classList.toggle('hidden', !show);
+                const buttonText = button.querySelector('.button-text');
+                const spinner = button.querySelector('.spinner');
+                if(buttonText) buttonText.classList.toggle('hidden', show);
+                if(spinner) spinner.classList.toggle('hidden', !show);
                 button.disabled = show;
             };
 
-            // --- Funções Principais ---
             async function fetchDocuments() {
                 documentListContainer.innerHTML = '<div class="spinner mx-auto"></div>';
                 try {
@@ -187,6 +187,7 @@
                     documents = data.documents || [];
                     renderDocumentList();
                 } catch (error) {
+                    console.error("Erro em fetchDocuments:", error);
                     documentListContainer.innerHTML = `<p class="text-red-500 text-sm">${error.message}</p>`;
                 }
             }
@@ -227,30 +228,39 @@
                 loginSection.classList.remove('hidden');
                 loginSection.classList.add('fade-in');
                 loginForm.reset();
-                // Opcional: Limpar token de sessão se estiver usando
             }
             
             // --- Lógica de Eventos ---
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
+            // CORREÇÃO: O evento agora é no BOTÃO e é 'click', não 'submit'
+            loginButton.addEventListener('click', async () => {
+                console.log("Botão de login clicado!"); // Para depuração
+                
                 loginError.textContent = '';
                 toggleButtonSpinner(loginButton, true);
 
                 try {
+                    console.log("Enviando requisição POST para:", N8N_WEBHOOK_URL);
                     const response = await fetch(N8N_WEBHOOK_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             action: 'login',
-                            email: e.target.email.value,
-                            password: e.target.password.value
+                            email: emailInput.value,
+                            password: passwordInput.value
                         })
                     });
-                    const data = await response.json();
-                    if (!response.ok || !data.success) throw new Error(data.message || 'Email ou senha inválidos.');
                     
-                    showPanel(e.target.email.value);
+                    console.log("Resposta recebida:", response.status, response.statusText);
+                    const data = await response.json();
+                    console.log("Dados da resposta:", data);
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Email ou senha inválidos.');
+                    }
+                    
+                    showPanel(emailInput.value);
                 } catch (error) {
+                    console.error("Erro no login:", error);
                     loginError.textContent = error.message;
                 } finally {
                     toggleButtonSpinner(loginButton, false);
@@ -258,12 +268,11 @@
             });
             
             uploadForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
+                e.preventDefault(); // Este preventDefault está correto para o upload
                 uploadStatus.textContent = '';
                 toggleButtonSpinner(uploadButton, true);
                 
                 const formData = new FormData(uploadForm);
-                // Adicionamos a ação ao FormData para o n8n saber o que fazer
                 formData.append('action', 'upload');
 
                 try {
@@ -277,8 +286,9 @@
                     uploadStatus.textContent = data.message;
                     uploadStatus.className = 'text-emerald-600 text-sm text-center h-4';
                     uploadForm.reset();
-                    fetchDocuments(); // Atualiza a lista
+                    fetchDocuments();
                 } catch (error) {
+                    console.error("Erro no upload:", error);
                     uploadStatus.textContent = error.message;
                     uploadStatus.className = 'text-red-600 text-sm text-center h-4';
                 } finally {
@@ -315,9 +325,10 @@
                     const data = await response.json();
                     if (!response.ok || !data.success) throw new Error(data.message || 'Falha ao excluir.');
 
-                    fetchDocuments(); // Atualiza a lista após excluir
+                    fetchDocuments();
                 } catch (error) {
-                    alert(error.message); // Simples alerta para erro na exclusão
+                    console.error("Erro ao deletar:", error);
+                    alert(error.message);
                 } finally {
                     deleteModal.classList.add('hidden');
                     documentIdToDelete = null;
