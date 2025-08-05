@@ -9,14 +9,8 @@
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide-icons"></script>
     <style>
-        /* Estilos para o spinner de carregamento */
-        .spinner {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -25,10 +19,10 @@
     <div id="login-screen" class="flex items-center justify-center min-h-screen">
         <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
             <h2 class="text-2xl font-bold text-center text-gray-800">Acesso ao Painel de Controle</h2>
-            
             <div id="login-error" class="hidden p-3 text-sm text-red-700 bg-red-100 rounded-lg"></div>
 
-            <form id="login-form" class="space-y-6" onsubmit="return false;">
+            <!-- Formulário com prevenção de envio padrão -->
+            <form id="login-form" class="space-y-6" onsubmit="event.preventDefault();">
                 <div>
                     <label for="email" class="text-sm font-medium text-gray-700">Email</label>
                     <input id="email" name="email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="seu@email.com">
@@ -38,6 +32,7 @@
                     <input id="password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="********">
                 </div>
                 <div>
+                    <!-- Botão com type="button" para não submeter o formulário por padrão -->
                     <button id="login-button" type="button" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
                         <span class="btn-text">Entrar</span>
                         <div class="spinner-container"></div>
@@ -49,7 +44,6 @@
 
     <!-- =========== PAINEL DE GERENCIAMENTO (DASHBOARD) =========== -->
     <div id="dashboard-screen" class="hidden">
-        <!-- Cabeçalho -->
         <header class="bg-white shadow-md">
             <div class="container flex items-center justify-between p-4 mx-auto">
                 <h1 class="text-xl font-bold text-gray-800">Gerenciador de Legislação</h1>
@@ -63,11 +57,8 @@
             </div>
         </header>
 
-        <!-- Conteúdo Principal -->
         <main class="container p-4 mx-auto mt-6">
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                
-                <!-- Coluna Esquerda: Formulário de Upload -->
                 <div class="p-6 bg-white rounded-lg shadow-md lg:col-span-1">
                     <h3 class="mb-4 text-lg font-semibold text-gray-800">Adicionar Novo Documento</h3>
                     <form id="upload-form" class="space-y-4">
@@ -85,7 +76,6 @@
                         </div>
                         <div>
                             <label for="file-upload" class="block text-sm font-medium text-gray-700">Arquivo (.pdf, .txt)</label>
-                            <!-- CORREÇÃO: O 'name' foi alterado para 'arquivo' para corresponder ao workflow do n8n -->
                             <input type="file" id="file-upload" name="arquivo" required accept=".pdf,.txt" class="w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
                         </div>
                         <button id="upload-button" type="submit" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
@@ -94,30 +84,21 @@
                         </button>
                     </form>
                 </div>
-
-                <!-- Coluna Direita: Lista de Documentos -->
                 <div class="p-6 bg-white rounded-lg shadow-md lg:col-span-2">
                     <h3 class="mb-4 text-lg font-semibold text-gray-800">Documentos na Base de Conhecimento</h3>
-                    <div id="documents-list" class="space-y-3">
-                        <!-- Itens da lista serão inseridos aqui pelo JavaScript -->
-                    </div>
+                    <div id="documents-list" class="space-y-3"></div>
                 </div>
-
             </div>
         </main>
     </div>
 
-    <!-- =========== MODAL DE CONFIRMAÇÃO DE EXCLUSÃO =========== -->
+    <!-- Modal de Exclusão -->
     <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
         <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
             <h3 class="text-lg font-bold text-gray-900">Confirmar Exclusão</h3>
-            <p class="mt-2 text-sm text-gray-600">
-                Você tem certeza que deseja deletar este documento? Esta ação marcará o documento como inativo.
-            </p>
+            <p class="mt-2 text-sm text-gray-600">Você tem certeza? Esta ação marcará o documento como inativo.</p>
             <div class="mt-6 space-x-2 text-right">
-                <button id="cancel-delete" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                    Cancelar
-                </button>
+                <button id="cancel-delete" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">Cancelar</button>
                 <button id="confirm-delete-button" class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50">
                     <span class="btn-text">Deletar</span>
                     <div class="spinner-container"></div>
@@ -126,89 +107,54 @@
         </div>
     </div>
 
-
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const WEBHOOK_URL = 'https://n8n.lucasmanoel.cloud/webhook/861a9747-ea67-4d42-b1d8-b898304c31a0';
 
-        // =================================================================
-        // CONFIGURAÇÃO INICIAL E SELETORES DE ELEMENTOS
-        // =================================================================
-
-        // IMPORTANTE: Substitua pela URL real do seu webhook do n8n.
-        // O ID do webhook está no seu nó "Webhook": path: "861a9747-ea67-4d42-b1d8-b898304c31a0"
-        const WEBHOOK_URL = 'https://n8n.lucasmanoel.cloud/webhook/861a9747-ea67-4d42-b1d8-b898304c31a0'; 
-
-        // Telas principais
         const loginScreen = document.getElementById('login-screen');
         const dashboardScreen = document.getElementById('dashboard-screen');
-
-        // Formulário de Login
         const loginForm = document.getElementById('login-form');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const loginButton = document.getElementById('login-button');
         const loginError = document.getElementById('login-error');
-        
-        // Dashboard
         const userEmailSpan = document.getElementById('user-email');
         const logoutButton = document.getElementById('logout-button');
-        
-        // Formulário de Upload
         const uploadForm = document.getElementById('upload-form');
         const uploadButton = document.getElementById('upload-button');
-
-        // Lista de Documentos
         const documentsList = document.getElementById('documents-list');
-
-        // Modal de Exclusão
         const deleteModal = document.getElementById('delete-modal');
         const cancelDeleteButton = document.getElementById('cancel-delete');
         const confirmDeleteButton = document.getElementById('confirm-delete-button');
 
-        // Estado da aplicação
-        let currentUserEmail = null;
         let documentIdToDelete = null;
 
-        // =================================================================
-        // FUNÇÕES AUXILIARES
-        // =================================================================
-
-        /**
-         * Mostra um spinner de carregamento dentro de um botão e o desabilita.
-         * @param {HTMLButtonElement} button O botão onde o spinner será exibido.
-         */
         function showSpinner(button) {
             button.disabled = true;
             const textSpan = button.querySelector('.btn-text');
             const spinnerContainer = button.querySelector('.spinner-container');
-            if(textSpan) textSpan.style.display = 'none';
-            if(spinnerContainer) spinnerContainer.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div>';
+            if (textSpan) textSpan.style.display = 'none';
+            if (spinnerContainer) spinnerContainer.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div>';
         }
 
-        /**
-         * Esconde o spinner de carregamento de um botão e o reabilita.
-         * @param {HTMLButtonElement} button O botão de onde o spinner será removido.
-         */
         function hideSpinner(button) {
             button.disabled = false;
             const textSpan = button.querySelector('.btn-text');
             const spinnerContainer = button.querySelector('.spinner-container');
-            if(textSpan) textSpan.style.display = '';
-            if(spinnerContainer) spinnerContainer.innerHTML = '';
+            if (textSpan) textSpan.style.display = '';
+            if (spinnerContainer) spinnerContainer.innerHTML = '';
         }
-        
-        /**
-         * Realiza uma requisição fetch para o webhook do n8n.
-         * @param {object | FormData} body O corpo da requisição.
-         * @returns {Promise<any>} A resposta da API em JSON.
-         */
+
         async function apiRequest(body) {
             const isFormData = body instanceof FormData;
-            
             const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
             const requestBody = isFormData ? body : JSON.stringify(body);
 
             try {
+                // LOG DE DEBUG: Ver o que está sendo enviado
+                console.log('Enviando requisição POST para:', WEBHOOK_URL);
+                console.log('Corpo da requisição:', body);
+
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: headers,
@@ -216,7 +162,7 @@
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ message: 'Erro de comunicação com o servidor.' }));
+                    const errorData = await response.json().catch(() => ({ message: 'Erro de comunicação.' }));
                     throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
                 }
                 return await response.json();
@@ -225,14 +171,9 @@
                 throw error;
             }
         }
-        
-        // =================================================================
-        // LÓGICA DE GERENCIAMENTO DE TELAS
-        // =================================================================
-        
+
         function showLoginScreen() {
             sessionStorage.removeItem('userEmail');
-            currentUserEmail = null;
             loginScreen.classList.remove('hidden');
             dashboardScreen.classList.add('hidden');
             loginForm.reset();
@@ -240,17 +181,12 @@
 
         function showDashboardScreen(userEmail) {
             sessionStorage.setItem('userEmail', userEmail);
-            currentUserEmail = userEmail;
             userEmailSpan.textContent = userEmail;
             loginScreen.classList.add('hidden');
             dashboardScreen.classList.remove('hidden');
             lucide.createIcons();
             fetchAndRenderDocuments();
         }
-
-        // =================================================================
-        // LÓGICA DE AUTENTICAÇÃO
-        // =================================================================
 
         async function handleLogin() {
             const email = emailInput.value;
@@ -284,25 +220,19 @@
             }
         }
 
-        // =================================================================
-        // LÓGICA DO PAINEL (DASHBOARD)
-        // =================================================================
-        
         async function fetchAndRenderDocuments() {
-            documentsList.innerHTML = '<p class="text-gray-500">Carregando documentos...</p>';
+            documentsList.innerHTML = '<p class="text-gray-500">Carregando...</p>';
             try {
                 const response = await apiRequest({ action: 'list' });
-                // Seu n8n retorna: {"documents": "[{...}]"}
-                // Portanto, precisamos fazer o parse do JSON stringificado.
                 const docs = JSON.parse(response.documents);
                 
                 if (Array.isArray(docs)) {
                     renderDocuments(docs);
                 } else {
-                    documentsList.innerHTML = '<p class="text-red-500">Formato de resposta inválido do servidor.</p>';
+                    documentsList.innerHTML = '<p class="text-red-500">Resposta inválida.</p>';
                 }
             } catch (error) {
-                documentsList.innerHTML = `<p class="text-red-500">Erro ao carregar documentos: ${error.message}</p>`;
+                documentsList.innerHTML = `<p class="text-red-500">Erro ao carregar: ${error.message}</p>`;
             }
         }
 
@@ -312,23 +242,18 @@
                 documentsList.innerHTML = '<p class="text-gray-500">Nenhum documento encontrado.</p>';
                 return;
             }
-
             docs.forEach(doc => {
-                // CORREÇÃO: Usando as chaves corretas ('titulo', 'municipio', 'data_upload') vindas do n8n.
                 const uploadDate = new Date(doc.data_upload).toLocaleDateString('pt-BR');
                 const docElement = document.createElement('div');
                 docElement.className = 'flex items-center justify-between p-3 border rounded-md hover:bg-gray-50';
                 docElement.innerHTML = `
                     <div class="flex-grow">
                         <p class="font-semibold text-gray-800">${doc.titulo}</p>
-                        <p class="text-sm text-gray-600">
-                            ${doc.municipio} - Adicionado em: ${uploadDate}
-                        </p>
+                        <p class="text-sm text-gray-600">${doc.municipio} - Adicionado em: ${uploadDate}</p>
                     </div>
                     <button class="p-2 text-red-500 rounded-full delete-button hover:bg-red-100" data-id="${doc.id}" title="Deletar">
                         <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
-                    </button>
-                `;
+                    </button>`;
                 documentsList.appendChild(docElement);
             });
             lucide.createIcons();
@@ -338,16 +263,14 @@
             event.preventDefault();
             const formData = new FormData(uploadForm);
             formData.append('action', 'upload');
-
             showSpinner(uploadButton);
-
             try {
                 const data = await apiRequest(formData);
                 if (data.success) {
                     uploadForm.reset();
                     await fetchAndRenderDocuments();
                 } else {
-                    alert('Falha no upload: ' + (data.message || 'Erro desconhecido.'));
+                    alert('Falha no upload: ' + (data.message || 'Erro.'));
                 }
             } catch (error) {
                 alert('Erro no upload: ' + error.message);
@@ -371,19 +294,16 @@
 
         async function confirmDelete() {
             if (!documentIdToDelete) return;
-
             showSpinner(confirmDeleteButton);
-
             try {
                 const data = await apiRequest({
                     action: 'delete',
                     documentId: documentIdToDelete
                 });
-
                 if (data.success) {
                     await fetchAndRenderDocuments();
                 } else {
-                    alert('Falha ao deletar: ' + (data.message || 'Erro desconhecido.'));
+                    alert('Falha ao deletar: ' + (data.message || 'Erro.'));
                 }
             } catch (error) {
                 alert('Erro ao deletar: ' + error.message);
@@ -393,20 +313,12 @@
             }
         }
 
-        // =================================================================
-        // EVENT LISTENERS
-        // =================================================================
-
         loginButton.addEventListener('click', handleLogin);
         logoutButton.addEventListener('click', showLoginScreen);
         uploadForm.addEventListener('submit', handleUpload);
         documentsList.addEventListener('click', handleDeleteClick);
         cancelDeleteButton.addEventListener('click', closeDeleteModal);
         confirmDeleteButton.addEventListener('click', confirmDelete);
-
-        // =================================================================
-        // INICIALIZAÇÃO DA APLICAÇÃO
-        // =================================================================
 
         const savedUser = sessionStorage.getItem('userEmail');
         if (savedUser) {
