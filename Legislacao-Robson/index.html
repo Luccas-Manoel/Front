@@ -1,342 +1,461 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle - Gerenciador de Legislação</title>
-
+    <title>Painel de Controle</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Ícones (Lucide Icons) -->
-    <script src="https://unpkg.com/lucide-icons@latest/dist/lucide.min.js"></script>
-
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide-icons"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .hidden { display: none; }
+        /* Estilos adicionais para o spinner */
         .spinner {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #3498db;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 font-sans">
 
-    <!-- Seção de Login -->
-    <div id="login-section" class="flex items-center justify-center min-h-screen p-4">
-        <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6 fade-in">
-            <div class="text-center">
-                <h1 class="text-2xl font-bold text-gray-800">Acesso ao Painel de Controle</h1>
-                <p class="text-gray-500 text-sm mt-2">Utilize suas credenciais para gerenciar a base de conhecimento.</p>
-            </div>
-            <!-- CORREÇÃO: Adicionado onsubmit="return false;" para uma camada extra de prevenção -->
-            <form id="login-form" class="space-y-4" onsubmit="return false;">
+    <!-- =========== TELA DE LOGIN =========== -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-center text-gray-800">Acesso ao Painel de Controle</h2>
+            
+            <div id="login-error" class="hidden p-3 text-sm text-red-700 bg-red-100 rounded-lg"></div>
+
+            <form id="login-form" class="space-y-6" onsubmit="return false;">
                 <div>
                     <label for="email" class="text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    <input id="email" name="email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="seu@email.com">
                 </div>
                 <div>
                     <label for="password" class="text-sm font-medium text-gray-700">Senha</label>
-                    <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    <input id="password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="********">
                 </div>
-                <!-- CORREÇÃO: Alterado o type do botão para "button" para não submeter o formulário por padrão -->
-                <button type="button" id="login-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300">
-                    <span class="button-text">Entrar</span>
-                    <div class="spinner hidden"></div>
-                </button>
-                <p id="login-error" class="text-red-600 text-sm text-center h-4"></p>
+                <div>
+                    <button id="login-button" type="button" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+                        <span class="btn-text">Entrar</span>
+                        <div class="spinner-container"></div>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Seção do Painel Principal (O restante do código permanece o mesmo) -->
-    <div id="panel-section" class="hidden">
-        <header class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-gray-900">Gerenciador de Legislação</h1>
-                <div class="flex items-center space-x-2">
-                     <span id="user-email-display" class="text-sm text-gray-600"></span>
-                     <button id="logout-button" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" title="Sair">
-                        <i data-lucide="log-out" class="w-5 h-5"></i>
+    <!-- =========== PAINEL DE GERENCIAMENTO (DASHBOARD) =========== -->
+    <div id="dashboard-screen" class="hidden">
+        <!-- Cabeçalho -->
+        <header class="bg-white shadow-md">
+            <div class="container flex items-center justify-between p-4 mx-auto">
+                <h1 class="text-xl font-bold text-gray-800">Gerenciador de Legislação</h1>
+                <div class="flex items-center space-x-4">
+                    <span id="user-email" class="text-sm text-gray-600"></span>
+                    <button id="logout-button" class="flex items-center px-3 py-2 text-sm text-red-600 border border-red-200 rounded-md hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                        Sair
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 h-fit">
-                    <h2 class="text-lg font-bold flex items-center"><i data-lucide="file-plus-2" class="w-5 h-5 mr-2"></i>Adicionar Novo Documento</h2>
-                    <form id="upload-form" class="space-y-4 mt-4">
+        <!-- Conteúdo Principal -->
+        <main class="container p-4 mx-auto mt-6">
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                
+                <!-- Coluna Esquerda: Formulário de Upload -->
+                <div class="p-6 bg-white rounded-lg shadow-md lg:col-span-1">
+                    <h3 class="mb-4 text-lg font-semibold text-gray-800">Adicionar Novo Documento</h3>
+                    <form id="upload-form" class="space-y-4">
                         <div>
-                            <label for="municipio" class="text-sm font-medium text-gray-700">Município</label>
-                            <input type="text" id="municipio" name="municipio" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <label for="municipio" class="block text-sm font-medium text-gray-700">Município</label>
+                            <input type="text" id="municipio" name="municipio" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                         <div>
-                            <label for="titulo" class="text-sm font-medium text-gray-700">Título do Documento</label>
-                            <input type="text" id="titulo" name="titulo" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <label for="titulo" class="block text-sm font-medium text-gray-700">Título do Documento</label>
+                            <input type="text" id="titulo" name="titulo" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                         <div>
-                            <label for="artigo" class="text-sm font-medium text-gray-700">Artigo/Seção <span class="text-gray-400">(Opcional)</span></label>
-                            <input type="text" id="artigo" name="artigo" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            <label for="artigo" class="block text-sm font-medium text-gray-700">Artigo/Seção (Opcional)</label>
+                            <input type="text" id="artigo" name="artigo" class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                         <div>
-                            <label for="arquivo" class="text-sm font-medium text-gray-700">Arquivo (.pdf ou .txt)</label>
-                            <input type="file" id="arquivo" name="arquivo" required accept=".pdf,.txt" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition cursor-pointer">
+                            <label for="file-upload" class="block text-sm font-medium text-gray-700">Arquivo (.pdf, .txt)</label>
+                            <input type="file" id="file-upload" name="file" required accept=".pdf,.txt" class="w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
                         </div>
-                        <button type="submit" id="upload-button" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300">
-                            <span class="button-text"><i data-lucide="upload-cloud" class="w-4 h-4 inline-block mr-2"></i>Enviar Documento</span>
-                            <div class="spinner hidden"></div>
+                        <button id="upload-button" type="submit" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+                            <span class="btn-text">Enviar Documento</span>
+                            <div class="spinner-container"></div>
                         </button>
-                        <p id="upload-status" class="text-sm text-center h-4"></p>
                     </form>
                 </div>
 
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
-                     <h2 class="text-lg font-bold flex items-center"><i data-lucide="library" class="w-5 h-5 mr-2"></i>Documentos na Base de Conhecimento</h2>
-                    <div id="document-list" class="mt-4 space-y-3">
-                        <!-- Os documentos serão inseridos aqui pelo JavaScript -->
+                <!-- Coluna Direita: Lista de Documentos -->
+                <div class="p-6 bg-white rounded-lg shadow-md lg:col-span-2">
+                    <h3 class="mb-4 text-lg font-semibold text-gray-800">Documentos na Base de Conhecimento</h3>
+                    <div id="documents-list" class="space-y-3">
+                        <!-- Itens da lista serão inseridos aqui pelo JavaScript -->
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"><i data-lucide="trash-2" class="w-6 h-6 text-red-600"></i></div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Excluir Documento</h3>
-                <div class="mt-2 px-7 py-3"><p class="text-sm text-gray-500">Você tem certeza que deseja excluir este documento? Esta ação não pode ser desfeita.</p></div>
-                <div class="items-center px-4 py-3 space-x-2">
-                    <button id="cancel-delete-button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none">Cancelar</button>
-                    <button id="confirm-delete-button" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none">Confirmar Exclusão</button>
-                </div>
+    <!-- =========== MODAL DE CONFIRMAÇÃO DE EXCLUSÃO =========== -->
+    <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
+        <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
+            <h3 class="text-lg font-bold text-gray-900">Confirmar Exclusão</h3>
+            <p class="mt-2 text-sm text-gray-600">
+                Você tem certeza que deseja deletar este documento? Esta ação não pode ser desfeita.
+            </p>
+            <div class="mt-6 space-x-2 text-right">
+                <button id="cancel-delete" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    Cancelar
+                </button>
+                <button id="confirm-delete-button" class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50">
+                    <span class="btn-text">Deletar</span>
+                    <div class="spinner-container"></div>
+                </button>
             </div>
         </div>
     </div>
 
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+    document.addEventListener('DOMContentLoaded', () => {
 
-            const loginSection = document.getElementById('login-section');
-            const panelSection = document.getElementById('panel-section');
-            const loginForm = document.getElementById('login-form');
-            const uploadForm = document.getElementById('upload-form');
-            const loginButton = document.getElementById('login-button');
-            const uploadButton = document.getElementById('upload-button');
-            const logoutButton = document.getElementById('logout-button');
-            const loginError = document.getElementById('login-error');
-            const uploadStatus = document.getElementById('upload-status');
-            const userEmailDisplay = document.getElementById('user-email-display');
-            const documentListContainer = document.getElementById('document-list');
-            const deleteModal = document.getElementById('delete-modal');
-            const cancelDeleteButton = document.getElementById('cancel-delete-button');
-            const confirmDeleteButton = document.getElementById('confirm-delete-button');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
+        // =================================================================
+        // CONFIGURAÇÃO INICIAL E SELETORES DE ELEMENTOS
+        // =================================================================
 
-            const N8N_WEBHOOK_URL = 'https://n8n.lucasmanoel.cloud/webhook/861a9747-ea67-4d42-b1d8-b898304c31a0';
+        // URL do webhook do n8n. Substitua pela sua URL real.
+        const WEBHOOK_URL = 'https://webhook.site/d290234a-9c7b-4d43-9824-7f6501a4e12e'; // URL de teste, substitua!
+
+        // Telas principais
+        const loginScreen = document.getElementById('login-screen');
+        const dashboardScreen = document.getElementById('dashboard-screen');
+
+        // Formulário de Login
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-button');
+        const loginError = document.getElementById('login-error');
+        
+        // Dashboard
+        const userEmailSpan = document.getElementById('user-email');
+        const logoutButton = document.getElementById('logout-button');
+        
+        // Formulário de Upload
+        const uploadForm = document.getElementById('upload-form');
+        const uploadButton = document.getElementById('upload-button');
+
+        // Lista de Documentos
+        const documentsList = document.getElementById('documents-list');
+
+        // Modal de Exclusão
+        const deleteModal = document.getElementById('delete-modal');
+        const cancelDeleteButton = document.getElementById('cancel-delete');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
+
+        // Estado da aplicação
+        let currentUserEmail = null;
+        let documentIdToDelete = null;
+
+        // =================================================================
+        // FUNÇÕES AUXILIARES
+        // =================================================================
+
+        /**
+         * Mostra um spinner de carregamento dentro de um botão e o desabilita.
+         * @param {HTMLButtonElement} button O botão onde o spinner será exibido.
+         */
+        function showSpinner(button) {
+            button.disabled = true;
+            const textSpan = button.querySelector('.btn-text');
+            const spinnerContainer = button.querySelector('.spinner-container');
+            textSpan.style.display = 'none';
+            spinnerContainer.innerHTML = '<div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full spinner"></div>';
+        }
+
+        /**
+         * Esconde o spinner de carregamento de um botão e o reabilita.
+         * @param {HTMLButtonElement} button O botão de onde o spinner será removido.
+         */
+        function hideSpinner(button) {
+            button.disabled = false;
+            const textSpan = button.querySelector('.btn-text');
+            const spinnerContainer = button.querySelector('.spinner-container');
+            textSpan.style.display = '';
+            spinnerContainer.innerHTML = '';
+        }
+        
+        /**
+         * Realiza uma requisição fetch para o webhook.
+         * @param {object | FormData} body O corpo da requisição.
+         * @returns {Promise<any>} A resposta da API em JSON.
+         */
+        async function apiRequest(body) {
+            const isFormData = body instanceof FormData;
             
-            let documents = [];
-            let documentIdToDelete = null;
+            const headers = isFormData ? {} : { 'Content-Type': 'application/json' };
+            const requestBody = isFormData ? body : JSON.stringify(body);
 
-            const toggleButtonSpinner = (button, show) => {
-                const buttonText = button.querySelector('.button-text');
-                const spinner = button.querySelector('.spinner');
-                if(buttonText) buttonText.classList.toggle('hidden', show);
-                if(spinner) spinner.classList.toggle('hidden', !show);
-                button.disabled = show;
-            };
-
-            async function fetchDocuments() {
-                documentListContainer.innerHTML = '<div class="spinner mx-auto"></div>';
-                try {
-                    const response = await fetch(N8N_WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'list' })
-                    });
-                    if (!response.ok) throw new Error('Falha ao buscar documentos.');
-                    
-                    const data = await response.json();
-                    documents = data.documents || [];
-                    renderDocumentList();
-                } catch (error) {
-                    console.error("Erro em fetchDocuments:", error);
-                    documentListContainer.innerHTML = `<p class="text-red-500 text-sm">${error.message}</p>`;
-                }
-            }
-
-            function renderDocumentList() {
-                documentListContainer.innerHTML = '';
-                if (documents.length === 0) {
-                    documentListContainer.innerHTML = '<p class="text-gray-500 text-sm">Nenhum documento encontrado. Adicione um novo para começar.</p>';
-                    return;
-                }
-                documents.forEach(doc => {
-                    const docElement = document.createElement('div');
-                    docElement.className = 'p-4 border rounded-lg flex justify-between items-center bg-gray-50';
-                    docElement.innerHTML = `
-                        <div>
-                            <p class="font-semibold text-gray-800">${doc.titulo}</p>
-                            <p class="text-sm text-gray-500">${doc.municipio} - <span class="text-xs italic">Adicionado em: ${new Date(doc.data_upload).toLocaleDateString()}</span></p>
-                        </div>
-                        <button class="delete-button p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full transition" data-id="${doc.id}" title="Excluir">
-                            <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
-                        </button>
-                    `;
-                    documentListContainer.appendChild(docElement);
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: headers,
+                    body: requestBody
                 });
-                lucide.createIcons();
-            }
 
-            function showPanel(email) {
-                userEmailDisplay.textContent = email;
-                loginSection.classList.add('hidden');
-                panelSection.classList.remove('hidden');
-                panelSection.classList.add('fade-in');
-                fetchDocuments();
-            }
-
-            function showLogin() {
-                panelSection.classList.add('hidden');
-                loginSection.classList.remove('hidden');
-                loginSection.classList.add('fade-in');
-                loginForm.reset();
-            }
-            
-            // --- Lógica de Eventos ---
-            // CORREÇÃO: O evento agora é no BOTÃO e é 'click', não 'submit'
-            loginButton.addEventListener('click', async () => {
-                console.log("Botão de login clicado!"); // Para depuração
-                
-                loginError.textContent = '';
-                toggleButtonSpinner(loginButton, true);
-
-                try {
-                    console.log("Enviando requisição POST para:", N8N_WEBHOOK_URL);
-                    const response = await fetch(N8N_WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'login',
-                            email: emailInput.value,
-                            password: passwordInput.value
-                        })
-                    });
-                    
-                    console.log("Resposta recebida:", response.status, response.statusText);
-                    const data = await response.json();
-                    console.log("Dados da resposta:", data);
-
-                    if (!response.ok || !data.success) {
-                        throw new Error(data.message || 'Email ou senha inválidos.');
-                    }
-                    
-                    showPanel(emailInput.value);
-                } catch (error) {
-                    console.error("Erro no login:", error);
-                    loginError.textContent = error.message;
-                } finally {
-                    toggleButtonSpinner(loginButton, false);
+                if (!response.ok) {
+                    // Tenta ler a mensagem de erro do corpo da resposta
+                    const errorData = await response.json().catch(() => ({ message: 'Erro de comunicação com o servidor.' }));
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
                 }
-            });
+
+                return await response.json();
+            } catch (error) {
+                console.error('API Request Error:', error);
+                throw error; // Re-lança o erro para ser tratado pela função que chamou
+            }
+        }
+        
+        // =================================================================
+        // LÓGICA DE GERENCIAMENTO DE TELAS
+        // =================================================================
+        
+        /**
+         * Esconde o painel e mostra a tela de login.
+         */
+        function showLoginScreen() {
+            currentUserEmail = null;
+            sessionStorage.removeItem('userEmail');
+            loginScreen.classList.remove('hidden');
+            dashboardScreen.classList.add('hidden');
+            loginForm.reset();
+        }
+
+        /**
+         * Esconde a tela de login e mostra o painel principal.
+         * @param {string} userEmail O email do usuário logado.
+         */
+        function showDashboardScreen(userEmail) {
+            currentUserEmail = userEmail;
+            sessionStorage.setItem('userEmail', userEmail);
+            userEmailSpan.textContent = userEmail;
+
+            loginScreen.classList.add('hidden');
+            dashboardScreen.classList.remove('hidden');
             
-            uploadForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); // Este preventDefault está correto para o upload
-                uploadStatus.textContent = '';
-                toggleButtonSpinner(uploadButton, true);
+            // Renderiza ícones e carrega a lista de documentos
+            lucide.createIcons();
+            fetchAndRenderDocuments();
+        }
+
+        // =================================================================
+        // LÓGICA DE AUTENTICAÇÃO
+        // =================================================================
+
+        /**
+         * Manipula o evento de clique no botão de login.
+         */
+        async function handleLogin() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                loginError.textContent = 'Por favor, preencha o email e a senha.';
+                loginError.classList.remove('hidden');
+                return;
+            }
+            
+            showSpinner(loginButton);
+            loginError.classList.add('hidden');
+
+            try {
+                const data = await apiRequest({
+                    action: 'login',
+                    email: email,
+                    password: password
+                });
                 
-                const formData = new FormData(uploadForm);
-                formData.append('action', 'upload');
+                // Assumindo que o webhook responde com { "success": true } em caso de sucesso.
+                if (data.success) {
+                    showDashboardScreen(email);
+                } else {
+                    loginError.textContent = data.message || 'Credenciais inválidas.';
+                    loginError.classList.remove('hidden');
+                }
+            } catch (error) {
+                loginError.textContent = error.message;
+                loginError.classList.remove('hidden');
+            } finally {
+                hideSpinner(loginButton);
+            }
+        }
 
-                try {
-                    const response = await fetch(N8N_WEBHOOK_URL, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await response.json();
-                    if (!response.ok || !data.success) throw new Error(data.message || 'Erro no upload.');
+        // =================================================================
+        // LÓGICA DO PAINEL (DASHBOARD)
+        // =================================================================
+        
+        /**
+         * Busca e renderiza a lista de documentos.
+         */
+        async function fetchAndRenderDocuments() {
+            documentsList.innerHTML = '<p class="text-gray-500">Carregando documentos...</p>';
+            try {
+                const data = await apiRequest({ action: 'list' });
+                
+                // Assumindo que a resposta é { "documents": [...] }
+                if (data.documents && Array.isArray(data.documents)) {
+                    renderDocuments(data.documents);
+                } else {
+                    documentsList.innerHTML = '<p class="text-red-500">Formato de resposta inválido do servidor.</p>';
+                }
+            } catch (error) {
+                documentsList.innerHTML = `<p class="text-red-500">Erro ao carregar documentos: ${error.message}</p>`;
+            }
+        }
 
-                    uploadStatus.textContent = data.message;
-                    uploadStatus.className = 'text-emerald-600 text-sm text-center h-4';
+        /**
+         * Renderiza a lista de documentos no DOM.
+         * @param {Array<object>} docs A lista de documentos.
+         */
+        function renderDocuments(docs) {
+            documentsList.innerHTML = ''; // Limpa a lista
+            if (docs.length === 0) {
+                documentsList.innerHTML = '<p class="text-gray-500">Nenhum documento encontrado.</p>';
+                return;
+            }
+
+            docs.forEach(doc => {
+                const uploadDate = new Date(doc.uploadedAt).toLocaleDateString('pt-BR');
+                const docElement = document.createElement('div');
+                docElement.className = 'flex items-center justify-between p-3 border rounded-md hover:bg-gray-50';
+                docElement.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="font-semibold text-gray-800">${doc.title}</p>
+                        <p class="text-sm text-gray-600">
+                            ${doc.municipality} - Adicionado em: ${uploadDate}
+                        </p>
+                    </div>
+                    <button class="p-2 text-red-500 rounded-full delete-button hover:bg-red-100" data-id="${doc.id}" title="Deletar">
+                        <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
+                    </button>
+                `;
+                documentsList.appendChild(docElement);
+            });
+            // Re-renderiza os ícones após adicionar novos elementos
+            lucide.createIcons();
+        }
+
+        /**
+         * Manipula o envio do formulário de upload.
+         * @param {Event} event O evento de submissão do formulário.
+         */
+        async function handleUpload(event) {
+            event.preventDefault();
+            const formData = new FormData(uploadForm);
+            formData.append('action', 'upload');
+
+            showSpinner(uploadButton);
+
+            try {
+                const data = await apiRequest(formData);
+                if (data.success) {
                     uploadForm.reset();
-                    fetchDocuments();
-                } catch (error) {
-                    console.error("Erro no upload:", error);
-                    uploadStatus.textContent = error.message;
-                    uploadStatus.className = 'text-red-600 text-sm text-center h-4';
-                } finally {
-                    toggleButtonSpinner(uploadButton, false);
-                    setTimeout(() => uploadStatus.textContent = '', 4000);
+                    await fetchAndRenderDocuments(); // Atualiza a lista
+                } else {
+                    alert('Falha no upload: ' + (data.message || 'Erro desconhecido.'));
                 }
-            });
+            } catch (error) {
+                alert('Erro no upload: ' + error.message);
+            } finally {
+                hideSpinner(uploadButton);
+            }
+        }
 
-            documentListContainer.addEventListener('click', (e) => {
-                const deleteButton = e.target.closest('.delete-button');
-                if (deleteButton) {
-                    documentIdToDelete = parseInt(deleteButton.dataset.id);
-                    deleteModal.classList.remove('hidden');
+        /**
+         * Manipula o clique para deletar um documento (abre o modal).
+         * @param {Event} event O evento de clique.
+         */
+        function handleDeleteClick(event) {
+            const deleteButton = event.target.closest('.delete-button');
+            if (deleteButton) {
+                documentIdToDelete = deleteButton.dataset.id;
+                deleteModal.classList.remove('hidden');
+            }
+        }
+        
+        /**
+         * Fecha o modal de confirmação de exclusão.
+         */
+        function closeDeleteModal() {
+            deleteModal.classList.add('hidden');
+            documentIdToDelete = null;
+        }
+
+        /**
+         * Confirma e executa a exclusão de um documento.
+         */
+        async function confirmDelete() {
+            if (!documentIdToDelete) return;
+
+            showSpinner(confirmDeleteButton);
+
+            try {
+                const data = await apiRequest({
+                    action: 'delete',
+                    documentId: documentIdToDelete
+                });
+
+                if (data.success) {
+                    await fetchAndRenderDocuments(); // Recarrega a lista
+                } else {
+                    alert('Falha ao deletar: ' + (data.message || 'Erro desconhecido.'));
                 }
-            });
+            } catch (error) {
+                alert('Erro ao deletar: ' + error.message);
+            } finally {
+                hideSpinner(confirmDeleteButton);
+                closeDeleteModal();
+            }
+        }
 
-            cancelDeleteButton.addEventListener('click', () => {
-                deleteModal.classList.add('hidden');
-                documentIdToDelete = null;
-            });
+        // =================================================================
+        // EVENT LISTENERS
+        // =================================================================
 
-            confirmDeleteButton.addEventListener('click', async () => {
-                if (documentIdToDelete === null) return;
-                
-                try {
-                    const response = await fetch(N8N_WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'delete',
-                            documentId: documentIdToDelete
-                        })
-                    });
-                    const data = await response.json();
-                    if (!response.ok || !data.success) throw new Error(data.message || 'Falha ao excluir.');
+        loginButton.addEventListener('click', handleLogin);
+        logoutButton.addEventListener('click', showLoginScreen);
+        uploadForm.addEventListener('submit', handleUpload);
+        documentsList.addEventListener('click', handleDeleteClick);
+        cancelDeleteButton.addEventListener('click', closeDeleteModal);
+        confirmDeleteButton.addEventListener('click', confirmDelete);
 
-                    fetchDocuments();
-                } catch (error) {
-                    console.error("Erro ao deletar:", error);
-                    alert(error.message);
-                } finally {
-                    deleteModal.classList.add('hidden');
-                    documentIdToDelete = null;
-                }
-            });
-            
-            logoutButton.addEventListener('click', showLogin);
-        });
+        // =================================================================
+        // INICIALIZAÇÃO DA APLICAÇÃO
+        // =================================================================
+
+        // Verifica se há um usuário logado na sessão ao carregar a página
+        const savedUser = sessionStorage.getItem('userEmail');
+        if (savedUser) {
+            showDashboardScreen(savedUser);
+        } else {
+            // Garante que a tela de login é a única visível no início
+            showLoginScreen();
+        }
+
+        // Renderiza os ícones iniciais
+        lucide.createIcons();
+
+    });
     </script>
 </body>
 </html>
